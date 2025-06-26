@@ -6,7 +6,8 @@ app = Flask(__name__)
 
 @app.route("/api/quotes", methods=['GET'])
 def quotes():
-    finnhub_client = finnhub.Client(api_key="{APIKEY}")
+    api_key = API_KEY.apiKey
+    finnhub_client = finnhub.Client(api_key="{api_key}")
     return jsonify(
         {
             "AAPL": finnhub_client.quote('AAPL')
