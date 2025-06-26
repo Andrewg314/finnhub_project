@@ -1,6 +1,17 @@
 from flask import Flask, jsonify
 import finnhub
+import API_KEY
 
-finnhub_client = finnhub.Client(api_key="d1atfdpr01qjhvtr9k00d1atfdpr01qjhvtr9k0g")
+app = Flask(__name__)
 
-print(finnhub_client.quote('AAPL'))
+@app.route("/api/quotes", methods=['GET'])
+def quotes():
+    finnhub_client = finnhub.Client(api_key="{APIKEY}")
+    return jsonify(
+        {
+            "AAPL": finnhub_client.quote('AAPL')
+        }
+    )
+
+if __name__ == "__main__":
+    app.run(debug=True, port=5000)
