@@ -12,10 +12,6 @@ def quotes():
     finnhub_client = finnhub.Client(api_key=key)
     return jsonify(
         {
-            "Apple": finnhub_client.quote('AAPL'),
-            "NVDIA": finnhub_client.quote('NVDA'),
-            "Amazon": finnhub_client.quote('AMZN'),
-            "Tesla": finnhub_client.quote('TSLA'),
             "AMD": finnhub_client.quote('AMD')
         }
     )
