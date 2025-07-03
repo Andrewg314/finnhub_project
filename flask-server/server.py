@@ -1,8 +1,10 @@
 from flask import Flask, jsonify
 import finnhub
 import API_KEY
+from flask_cors import CORS
 
 app = Flask(__name__)
+cors = CORS(app, origins='*')
 
 @app.route("/api/quotes", methods=['GET'])
 def quotes():
@@ -13,7 +15,8 @@ def quotes():
             "Apple": finnhub_client.quote('AAPL'),
             "NVDIA": finnhub_client.quote('NVDA'),
             "Amazon": finnhub_client.quote('AMZN'),
-            "Tesla": finnhub_client.quote('TSLA')
+            "Tesla": finnhub_client.quote('TSLA'),
+            "AMD": finnhub_client.quote('AMD')
         }
     )
 

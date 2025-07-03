@@ -1,12 +1,22 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
+import { useState, useEffect } from 'react'
 import './App.css'
+import axios from 'axios'
 
 function App() {
 
+  const fetchAPI = async () => {
+    const response = await axios.get("http://127.0.0.1:5000/api/quotes")
+    console.log(response.data.users)
+  }
+
+  useEffect(() => {
+    fetchAPI()
+  }, [])
+
   return (
-    <div>hihi</div>
+    <div>
+      
+    </div>
   )
 }
 
