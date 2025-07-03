@@ -16,12 +16,8 @@ function App() {
 
   return (
     <div>
-      {console.log(quotes)}
-      {
-        quotes.map((quote, index) => (
-          <div key={index}>{quote}</div>
-        ))
-      }
+      hi
+      {quotes}
     </div>
   )
 }
