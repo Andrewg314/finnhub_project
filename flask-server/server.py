@@ -12,7 +12,8 @@ def quotes():
     finnhub_client = finnhub.Client(api_key=key)
     return jsonify(
         {
-            "AMD": finnhub_client.quote('AMD')
+            "AMD": finnhub_client.quote('AMD'),
+            "NVDA": finnhub_client.quote('NVDA')
         }
     )
 
