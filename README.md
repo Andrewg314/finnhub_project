@@ -1,1 +1,1 @@
-Personal project, building app to get stock quotes using finnhub.io.
+Personal project, building app to get stock quotes using the [finnhub.io](https://finnhub.io/) Stock API.
