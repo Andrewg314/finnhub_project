@@ -1,0 +1,1 @@
+Personal project, building app to get stock quotes using finnhub.io.
