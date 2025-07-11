@@ -3,36 +3,48 @@ import './App.css'
 import axios from 'axios'
 
 function App() {
-  const [quotes, setQuotes] = useState({})
-  
+  const [quotes, setQuotes] = useState([])
+
   const keyLabels = {
-    c: "Current price",
-    d: "Change",
-    dp: "Percent change",
-    h: "High price of the day",
-    l: "Low price of the day",
-    o: "Open price of the day",
-    pc: "Previous close price",
-    t: "Published time in UNIX timestamp"
+    symbol: "Symbol",
+    price: "Current price",
+    change: "Change",
+    percent_change: "Percent change",
+    high_price: "High price of the day",
+    low_price: "Low price of the day",
+    open_price: "Open price of the day",
+    prev_close_price: "Previous close price",
+    timestamp_unix: "Published time"
+  }
+
+  const formatTimestamp = (ts) => {
+    const date = new Date(ts * 1000)
+    return date.toLocaleString()
   }
 
   const printAttributes = () => {
-  return Object.entries(quotes).map(([ticker, data]) => (
-    <div key={ticker}>
-      <strong>{ticker}</strong>
-      {Object.entries(data).map(([key, value]) => (
-        <div key={key}>
-          <strong>{keyLabels[key] || key}</strong>: {value}
-        </div>
-      ))}
-      <br />
-    </div>
-  ))
-}
+    return quotes.map((quote) => (
+      <div key={quote.id} className="quote-card">
+        <h3>{quote.symbol}</h3>
+        <div><strong>{keyLabels.price}:</strong> {quote.price}</div>
+        <div><strong>{keyLabels.change}:</strong> {quote.change}</div>
+        <div><strong>{keyLabels.percent_change}:</strong> {quote.percent_change}%</div>
+        <div><strong>{keyLabels.high_price}:</strong> {quote.high_price}</div>
+        <div><strong>{keyLabels.low_price}:</strong> {quote.low_price}</div>
+        <div><strong>{keyLabels.open_price}:</strong> {quote.open_price}</div>
+        <div><strong>{keyLabels.prev_close_price}:</strong> {quote.prev_close_price}</div>
+        <div><strong>{keyLabels.timestamp_unix}:</strong> {formatTimestamp(quote.timestamp_unix)}</div>
+      </div>
+    ))
+  }
 
   const fetchAPI = async () => {
-    const response = await axios.get("http://127.0.0.1:5000/api/quotes")
-    setQuotes(response.data)
+    try {
+      const response = await axios.get("http://127.0.0.1:5000/api/quotes")
+      setQuotes(response.data)
+    } catch (error) {
+      console.error("Error fetching quotes:", error)
+    }
   }
 
   useEffect(() => {
