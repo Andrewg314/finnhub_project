@@ -1,5 +1,6 @@
 import finnhub
 from flask import Flask, jsonify
+import datetime
 import login
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
@@ -12,6 +13,7 @@ cors = CORS(app, origins='*')
 app.config['SQLALCHEMY_DATABASE_URI'] = f'postgresql://postgres:{login.dbPassword}@localhost/quotes_db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
+symbols = ['AMD', 'NVDA']
 
 class StockQuote(db.Model):
     __tablename__ = 'stock_quotes'
@@ -30,43 +32,52 @@ class StockQuote(db.Model):
     __table_args__ = (db.UniqueConstraint('symbol', 'timestamp_unix'),)
 
 def fetch_and_store_quotes():
-    finnhub_client = finnhub.Client(api_key=login.apiKey)
-    symbols = ['AMD', 'NVDA']
+    with app.app_context():
+        finnhub_client = finnhub.Client(api_key=login.apiKey)
 
-    for symbol in symbols:
-        data = finnhub_client.quote(symbol)
+        for symbol in symbols:
+            data = finnhub_client.quote(symbol)
 
-        exists = StockQuote.query.filter_by(symbol=symbol, timestamp_unix=data['t']).first()
-        if not exists:
-            quote = StockQuote(
-                symbol=symbol,
-                price=data['c'],
-                change=data['d'],
-                percent_change=data['dp'],
-                high_price=data['h'],
-                low_price=data['l'],
-                open_price=data['o'],
-                prev_close_price=data['pc'],
-                timestamp_unix=data['t']
-            )
-            db.session.add(quote)
-            db.session.commit()
-
+            exists = StockQuote.query.filter_by(symbol=symbol, timestamp_unix=data['t']).first()
+            if not exists:
+                quote = StockQuote(
+                    symbol=symbol,
+                    price=data['c'],
+                    change=data['d'],
+                    percent_change=data['dp'],
+                    high_price=data['h'],
+                    low_price=data['l'],
+                    open_price=data['o'],
+                    prev_close_price=data['pc'],
+                    timestamp_unix=data['t']
+                )
+                db.session.add(quote)
+                db.session.commit()
 @app.route("/api/quotes", methods=['GET'])
 def quotes():
-    quotes = StockQuote.query.order_by(StockQuote.timestamp_unix.desc()).limit(10).all()
-    results = [{
-        "symbol": quote.symbol,
-        "price": float(quote.price),
-        "change": float(quote.change),
-        "percent_change": float(quote.percent_change),
-        "high_price": float(quote.high_price),
-        "low_price": float(quote.low_price),
-        "open_price": float(quote.open_price),
-        "prev_close_price": float(quote.prev_close_price),
-        "timestamp_unix": quote.timestamp_unix
-    } for quote in quotes]
-    return jsonify(results)
+    latest_quotes = []
+    for symbol in symbols:
+        latest_q = (
+            StockQuote.query
+            .filter_by(symbol=symbol)
+            .order_by(StockQuote.timestamp_unix.desc())
+            .first()
+        )
+
+        if latest_q:
+            latest_quotes.append({
+                "id": latest_q.id,
+                "symbol": latest_q.symbol,
+                "price": float(latest_q.price),
+                "change": float(latest_q.change),
+                "percent_change": float(latest_q.percent_change),
+                "high_price": float(latest_q.high_price),
+                "low_price": float(latest_q.low_price),
+                "open_price": float(latest_q.open_price),
+                "prev_close_price": float(latest_q.prev_close_price),
+                "timestamp_unix": latest_q.timestamp_unix
+            })
+    return jsonify(latest_quotes)
 
 scheduler = BackgroundScheduler()
 scheduler.add_job(func=fetch_and_store_quotes, trigger="interval", minutes=5)
@@ -74,4 +85,4 @@ scheduler.start()
 atexit.register(lambda: scheduler.shutdown())
 
 if __name__ == "__main__":
-    app.run(debug=True, port=5000)
+    app.run(debug=True, port=5000, use_reloader=False)
